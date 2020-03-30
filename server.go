@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+var closeFlag := false
+
 func handleConnection(conn net.Conn) {
 	// Create unix domain socket connection
 	sockConn, err := net.Dial("unix", sock)
@@ -23,6 +25,7 @@ func handleConnection(conn net.Conn) {
 
 func proxyShutdown(ch <-chan os.Signal, ln net.Listener) {
 	<-ch
+	closeFlag = true
 	ln.Close()
 }
 
@@ -40,6 +43,10 @@ func proxyServe()  {
 	for {
 		conn, err:= ln.Accept()
 		if err != nil {
+			if closeFlag {
+				break
+			}
+
 			log.Println(err)
 			continue
 		}
