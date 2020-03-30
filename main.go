@@ -67,5 +67,5 @@ func main() {
 	ch := make(chan os.Signal)
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	go listenForShutdown(ch, *cmd)
-	go proxyServe()
+	proxyServe()
 }
