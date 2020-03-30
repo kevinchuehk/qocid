@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var closeFlag := false
+var closeFlag = false
 
 func handleConnection(conn net.Conn) {
 	// Create unix domain socket connection
