@@ -35,6 +35,7 @@ func config() {
 func listenForShutdown(ch <-chan os.Signal, cmd exec.Cmd) {
 	<-ch
 	cmd.Process.Kill()
+	os.Remove(sock)
 	log.Println("container runtime closed...")
 }
 
@@ -51,7 +52,7 @@ func main() {
 		fmt.Sprint("--runtime ", "/bin/runc"),
 		
 		// subcommand
-		fmt.Sprint("system service ", "-t 0 ", sock),
+		fmt.Sprint("system service ", "-t 0 ", "unix://",sock),
 	}
 
 
