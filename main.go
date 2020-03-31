@@ -52,16 +52,23 @@ func main() {
 	os.Remove(sock)
 	config()
 	
-	args := []string {
-		// flags
-		fmt.Sprint("--root ", lib),
-		fmt.Sprint("--runtime ", "/bin/runc"),
+	// args := []string {
+	// 	// flags
+	// 	fmt.Sprint("--root ", lib),
+	// 	fmt.Sprint("--runtime ", "/bin/runc"),
 		
-		// subcommand
-		fmt.Sprint("system service ", "-t 0 ", "unix://",sock),
-	}
+	// 	// subcommand
+	// 	fmt.Sprint("system service ", "-t 0 ", "unix://",sock),
+	// }
+	// cmd := exec.Command("podman", args...)
 
-	cmd := exec.Command("podman", args...)
+	options := fmt.Sprint(
+		" --root ", lib,
+		" --runtime ", "/bin/runc",
+		" system service ", "-t 0 ", "unix://", sock,
+	)
+
+	cmd := exec.Command("podman", options)
 	log.Println(cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -74,6 +81,12 @@ func main() {
 	log.Println("container runtime started...")
 	ch := make(chan os.Signal)
 	signal.Notify(ch, os.Interrupt, os.Kill)
+	
 	go listenForShutdown(ch, *cmd)
-	proxyServe()
+	go proxyServe()
+	
+	err = cmd.Wait()
+	if err != nil {
+		log.Fatalf("cmd.Run() failed with %s\n", err)
+	}
 }
