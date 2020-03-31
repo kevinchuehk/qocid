@@ -62,13 +62,14 @@ func main() {
 	// }
 	// cmd := exec.Command("podman", args...)
 
-	options := fmt.Sprint(
+	runCmd := fmt.Sprint(
+		"podman system service",
+                " -t 0 ", "unix://", sock,
 		" --root ", lib,
-		" --runtime ", "/bin/runc",
-		" system service ", "-t 0 ", "unix://", sock,
+		" --runtime ", "/bin/runc ",
 	)
 
-	cmd := exec.Command("podman", options)
+	cmd := exec.Command("sh", "-c", runCmd)
 	log.Println(cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -87,6 +88,6 @@ func main() {
 	
 	err = cmd.Wait()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+		log.Fatalf("failed with %s\n", err)
 	}
 }
