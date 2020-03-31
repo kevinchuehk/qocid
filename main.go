@@ -54,7 +54,7 @@ func main() {
 
 	runCmd := fmt.Sprint(
 		"podman system service",
-                " -t 0 ", "unix://", sock,
+        " -t 0 ", "unix://", sock,
 		" --root ", lib,
 		" --runtime ", "/bin/runc ",
 	)
@@ -74,8 +74,5 @@ func main() {
 	go listenForShutdown(ch, *cmd)
 	proxyServe()
 	
-	err = cmd.Wait()
-	if err != nil {
-		log.Fatalf("failed with %s\n", err)
-	}
+	log.Println("qocid shutdown...")
 }

@@ -19,9 +19,10 @@ func handleConnection(conn net.Conn) {
 		return 
 	}
 	defer sockConn.Close()
+	defer conn.Close()
 
-	go io.Copy(conn, sockConn)
-	go io.Copy(sockConn, conn)
+	io.Copy(conn, sockConn)
+	io.Copy(sockConn, conn)
 }
 
 func proxyShutdown(ch <-chan os.Signal, ln net.Listener) {
