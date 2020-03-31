@@ -51,16 +51,6 @@ func main() {
 	// Remove sock file
 	os.Remove(sock)
 	config()
-	
-	// args := []string {
-	// 	// flags
-	// 	fmt.Sprint("--root ", lib),
-	// 	fmt.Sprint("--runtime ", "/bin/runc"),
-		
-	// 	// subcommand
-	// 	fmt.Sprint("system service ", "-t 0 ", "unix://",sock),
-	// }
-	// cmd := exec.Command("podman", args...)
 
 	runCmd := fmt.Sprint(
 		"podman system service",
@@ -68,9 +58,7 @@ func main() {
 		" --root ", lib,
 		" --runtime ", "/bin/runc ",
 	)
-
 	cmd := exec.Command("sh", "-c", runCmd)
-	log.Println(cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
@@ -80,11 +68,11 @@ func main() {
 	}
 
 	log.Println("container runtime started...")
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	
 	go listenForShutdown(ch, *cmd)
-	go proxyServe()
+	proxyServe()
 	
 	err = cmd.Wait()
 	if err != nil {

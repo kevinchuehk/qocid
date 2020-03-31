@@ -43,7 +43,7 @@ func proxyServe()  {
 		return 
 	}
 
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	go proxyShutdown(ch, ln)
 
