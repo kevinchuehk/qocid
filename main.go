@@ -33,9 +33,18 @@ func config() {
 }
 
 func listenForShutdown(ch <-chan os.Signal, cmd exec.Cmd) {
-	<-ch
-	cmd.Process.Kill()
-	log.Println("container runtime closed...")
+	for {
+		switch sig := <-ch {
+		case os.Interrupt:
+		case os.Kill:
+			cmd.Process.Kill()
+			log.Println("container runtime closed...")
+			break
+		default:
+			continue
+		}
+	}
+	
 	defer os.Remove(sock)
 }
 
@@ -56,6 +65,8 @@ func main() {
 	}
 
 	cmd := exec.Command("podman", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)

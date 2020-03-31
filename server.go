@@ -24,9 +24,17 @@ func handleConnection(conn net.Conn) {
 }
 
 func proxyShutdown(ch <-chan os.Signal, ln net.Listener) {
-	<-ch
-	closeFlag = true
-	ln.Close()
+	for {
+		switch sig := <-ch {
+		case os.Interrupt:
+		case os.Kill:
+			closeFlag = true
+			ln.Close()
+			break
+		default:
+			continue
+		}
+	}
 }
 
 func proxyServe()  {
