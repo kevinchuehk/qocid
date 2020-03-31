@@ -34,9 +34,8 @@ func config() {
 
 func listenForShutdown(ch <-chan os.Signal, cmd exec.Cmd) {
 	for {
-		switch sig := <-ch {
-		case os.Interrupt:
-		case os.Kill:
+		select {
+		case <-ch:
 			cmd.Process.Kill()
 			log.Println("container runtime closed...")
 			break

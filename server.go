@@ -25,9 +25,8 @@ func handleConnection(conn net.Conn) {
 
 func proxyShutdown(ch <-chan os.Signal, ln net.Listener) {
 	for {
-		switch sig := <-ch {
-		case os.Interrupt:
-		case os.Kill:
+		select {
+		case <-ch:
 			closeFlag = true
 			ln.Close()
 			break
