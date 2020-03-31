@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	tmp = "/var/tmp"
+	tmp = "/var/run/libpod"
 	lib = "/var/lib/containers"
 	run = "/var/run/containers"
 	sock = "/var/run/containers/docker.sock"
@@ -55,8 +55,6 @@ func main() {
 	args := []string {
 		// flags
 		fmt.Sprint("--root ", lib),
-		fmt.Sprint("--runroot ", run),
-		fmt.Sprint("--tmpdir ", tmp),
 		fmt.Sprint("--runtime ", "/bin/runc"),
 		
 		// subcommand
@@ -64,6 +62,7 @@ func main() {
 	}
 
 	cmd := exec.Command("podman", args...)
+	log.Println(cmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
