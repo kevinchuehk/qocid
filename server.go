@@ -12,6 +12,7 @@ var closeFlag = false
 
 func handleConnection(conn net.Conn) {
 	// Create unix domain socket connection
+	log.Println("conn in...")
 	sockConn, err := net.Dial("unix", sock)
 	if err != nil {
 		log.Println(err)
@@ -42,6 +43,7 @@ func proxyServe()  {
 		log.Println(err)
 		return 
 	}
+	log.Println("server up...")
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, os.Kill)
@@ -59,5 +61,7 @@ func proxyServe()  {
 		}
 		go handleConnection(conn)
 	}
+
+	log.Println("server down...")
 }
 
