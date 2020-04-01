@@ -70,7 +70,7 @@ func main() {
 	log.Println("container runtime started...")
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, os.Kill)
-	go listenForShutdown(ch, *cmd)
+	listenForShutdown(ch, *cmd)
 	
 	log.Println("container runtime shutdown...")
 }
