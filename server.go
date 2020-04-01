@@ -27,7 +27,7 @@ func proxyShutdown(ch <-chan os.Signal, srv http.Server) {
 }
 
 func proxyServe()  {
-	trueAddr := fmt.Sprint("unix://", sock)
+	trueAddr := fmt.Sprint("http://unix://", sock)
 	url, err := url.Parse(trueAddr)
 	if err != nil {
 		log.Println(err)
