@@ -38,7 +38,7 @@ func listenForShutdown(ch <-chan os.Signal, cmd exec.Cmd) {
 		case <-ch:
 			cmd.Process.Kill()
 			log.Println("container runtime closed...")
-			break
+			os.Exit(0)
 		default:
 			continue
 		}
