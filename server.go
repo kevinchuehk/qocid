@@ -1,43 +1,24 @@
 package main
 
 import (
-	"net"
-	"io"
+	"context"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"log"
-	"os/signal"
-	"io/ioutil"
 	"os"
+	"os/signal"
 	"fmt"
 )
 
-var closeFlag = false
-
-func handleConnection(conn net.Conn) {
-	// Create unix domain socket connection
-	log.Println("conn in...")
-	sockConn, err := net.Dial("unix", sock)
-	if err != nil {
-		log.Println(err)
-		return 
-	}
-	defer sockConn.Close()
-	defer conn.Close()
-	
-	// r, w := io.Pipe()
-	b, err := ioutil.ReadAll(conn)
-	fmt.Printf(len(b))
-	fmt.Printf("%s",b)
-
-	io.Copy(sockConn, conn)
-	io.Copy(conn, sockConn)
-}
-
-func proxyShutdown(ch <-chan os.Signal, ln net.Listener) {
+func proxyShutdown(ch <-chan os.Signal, srv http.Server) {
 	for {
 		select {
 		case <-ch:
-			closeFlag = true
-			ln.Close()
+			err := srv.Shutdown(context.Background())
+			if err != nil {
+				log.Printf("server shutdown: %v", err)
+			}
 			break
 		default:
 			continue
@@ -46,29 +27,27 @@ func proxyShutdown(ch <-chan os.Signal, ln net.Listener) {
 }
 
 func proxyServe()  {
-	ln, err := net.Listen("tcp", ":2375")
+	trueAddr := fmt.Sprint("unix://", sock)
+	url, err := url.Parse(trueAddr)
 	if err != nil {
 		log.Println(err)
-		return 
+		return
+	}
+
+	proxyHandler := httputil.NewSingleHostReverseProxy(url)
+	srv := http.Server {
+		Addr: ":2375",
+		Handler: proxyHandler,
+	}
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatal("HTTP server ListenAndServer: %v", err)
 	}
 	log.Println("server up...")
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, os.Kill)
-	go proxyShutdown(ch, ln)
-
-	for {
-		conn, err:= ln.Accept()
-		if err != nil {
-			if closeFlag {
-				break
-			}
-
-			log.Println(err)
-			continue
-		}
-		go handleConnection(conn)
-	}
+	go proxyShutdown(ch, srv)
 
 	log.Println("server down...")
 }
