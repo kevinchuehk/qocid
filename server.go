@@ -25,6 +25,7 @@ func handleConnection(conn net.Conn) {
 	
 	// r, w := io.Pipe()
 	b, err := ioutil.ReadAll(conn)
+	fmt.Printf(len(b))
 	fmt.Printf("%s",b)
 
 	io.Copy(sockConn, conn)
