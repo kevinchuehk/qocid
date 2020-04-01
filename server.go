@@ -5,7 +5,9 @@ import (
 	"io"
 	"log"
 	"os/signal"
+	"io/ioutil"
 	"os"
+	"fmt"
 )
 
 var closeFlag = false
@@ -20,6 +22,10 @@ func handleConnection(conn net.Conn) {
 	}
 	defer sockConn.Close()
 	defer conn.Close()
+	
+	// r, w := io.Pipe()
+	b, err := ioutil.ReadAll(conn)
+	fmt.Printf("%s",b)
 
 	io.Copy(sockConn, conn)
 	io.Copy(conn, sockConn)
