@@ -61,7 +61,7 @@ func main() {
 	cmd := exec.Command("sh", "-c", runCmd)
 	cmd.Env = append(
 		os.Environ(),
-		"PATH=$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH"
+		"PATH=$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH",
 	)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
