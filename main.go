@@ -59,10 +59,18 @@ func main() {
 		" --runtime ", "/bin/runc ",
 	)
 	cmd := exec.Command("sh", "-c", runCmd)
-	cmd.Env = append(
-		os.Environ(),
-		"PATH=$SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH",
+	snapEnv := os.Getenv("SNAP")
+
+	env := fmt.Sprint(
+		"PATH=",
+		os.Getenv("PATH"), 
+		fmt.Sprint(":", snapEnv, "/usr/sbin"),
+		fmt.Sprint(":", snapEnv, "/usr/bin"),
+		fmt.Sprint(":", snapEnv, "/sbin"),
+		fmt.Sprint(":", snapEnv, "/bin"),
 	)
+
+	cmd.Env = append( os.Environ(), env)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
