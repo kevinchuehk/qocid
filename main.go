@@ -16,7 +16,6 @@ const (
 	sock = "/var/run/containers/docker.sock"
 	registries = "/etc/containers/register.conf"
 	policy = "/etc/containers/policy.json"
-	libpod = "/etc/containers/libpod.conf"
 	cniConf = "/etc/cni/net.d/87-podman-bridge.conf"
 )
 
@@ -65,16 +64,6 @@ func config() {
 		)
 
 		if err := ioutil.WriteFile(policy, data, 0644); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if _, err := os.Stat(libpod); os.IsNotExist(err) {
-		data, _ := ioutil.ReadFile(
-			fmt.Sprint(snapEnv, libpod),
-		)
-
-		if err := ioutil.WriteFile(libpod, data, 0644); err != nil {
 			log.Fatal(err)
 		}
 	}
