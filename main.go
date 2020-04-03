@@ -111,7 +111,8 @@ func main() {
 	cmd := exec.Command("sh", "-c", runCmd)
 	env := fmt.Sprint(
 		"PATH=",
-		fmt.Sprint(snapEnv, "/usr/sbin"),
+		os.Getenv("PATH"),
+		fmt.Sprint(":", snapEnv, "/usr/sbin"),
 		fmt.Sprint(":", snapEnv, "/usr/bin"),
 		fmt.Sprint(":", snapEnv, "/sbin"),
 		fmt.Sprint(":", snapEnv, "/bin"),
