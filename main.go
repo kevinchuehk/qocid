@@ -36,6 +36,16 @@ func config() {
 		log.Println(err)
 	}
 
+	err = os.MkdirAll("/etc/containers", os.ModeDir) 
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = os.MkdirAll("/etc/cni/net.d", os.ModeDir) 
+	if err != nil {
+		log.Println(err)
+	}
+
 	snapEnv := os.Getenv("SNAP")
 	if snapEnv == "" { return }
 
@@ -116,6 +126,7 @@ func main() {
 		fmt.Sprint(":", snapEnv, "/usr/bin"),
 		fmt.Sprint(":", snapEnv, "/sbin"),
 		fmt.Sprint(":", snapEnv, "/bin"),
+		fmt.Sprint(":", snapEnv, "/opt/cni/bin"),
 	)
 	
 	LDEnv := fmt.Sprint(
