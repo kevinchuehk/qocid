@@ -1,22 +1,24 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
-	"os/signal"
-	"fmt"
-	"log"
-	"io/ioutil"
+	SYS "syscall"
+
+	DEATH "github.com/vrecan/death"
 )
 
 const (
-	tmp = "/var/run/libpod"
-	lib = "/var/lib/containers"
-	run = "/var/run/containers"
-	sock = "/var/run/containers/docker.sock"
+	tmp        = "/var/run/libpod"
+	lib        = "/var/lib/containers"
+	run        = "/var/run/containers"
+	sock       = "/var/run/containers/docker.sock"
 	registries = "/etc/containers/register.conf"
-	policy = "/etc/containers/policy.json"
-	cniConf = "/etc/cni/net.d/87-podman-bridge.conf"
+	policy     = "/etc/containers/policy.json"
+	cniConf    = "/etc/cni/net.d/87-podman-bridge.conf"
 )
 
 func config() {
@@ -35,18 +37,20 @@ func config() {
 		log.Println(err)
 	}
 
-	err = os.MkdirAll("/etc/containers", os.ModeDir) 
+	err = os.MkdirAll("/etc/containers", os.ModeDir)
 	if err != nil {
 		log.Println(err)
 	}
 
-	err = os.MkdirAll("/etc/cni/net.d", os.ModeDir) 
+	err = os.MkdirAll("/etc/cni/net.d", os.ModeDir)
 	if err != nil {
 		log.Println(err)
 	}
 
 	snapEnv := os.Getenv("SNAP")
-	if snapEnv == "" { return }
+	if snapEnv == "" {
+		return
+	}
 
 	if _, err := os.Stat(registries); os.IsNotExist(err) {
 		data, _ := ioutil.ReadFile(
@@ -79,21 +83,6 @@ func config() {
 	}
 }
 
-func listenForShutdown(ch <-chan os.Signal, cmd exec.Cmd) {
-	for {
-		select {
-		case <-ch:
-			cmd.Process.Kill()
-			log.Println("container runtime closed...")
-			os.Exit(0)
-		default:
-			continue
-		}
-	}
-	
-	defer os.Remove(sock)
-}
-
 func main() {
 	// Remove sock file
 	os.Remove(sock)
@@ -102,7 +91,7 @@ func main() {
 
 	runCmd := fmt.Sprint(
 		"podman system service",
-        " -t 0 ", "unix://", sock,
+		" -t 0 ", "unix://", sock,
 		" --root ", lib,
 		" --runtime ", "/bin/runc ",
 		" --conmon ", fmt.Sprint(snapEnv, "/libexec/podman/conmon"),
@@ -118,14 +107,14 @@ func main() {
 		fmt.Sprint(":", snapEnv, "/bin"),
 		fmt.Sprint(":", snapEnv, "/opt/cni/bin"),
 	)
-	
+
 	LDEnv := fmt.Sprint(
 		"LD_LIBRARY_PATH=",
 		fmt.Sprint(snapEnv, "/lib"),
 		fmt.Sprint(":", snapEnv, "/usr/lib"),
-	) 
+	)
 
-	cmd.Env = append( os.Environ(), env, LDEnv)
+	cmd.Env = append(os.Environ(), env, LDEnv)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
@@ -135,9 +124,13 @@ func main() {
 	}
 
 	log.Println("container runtime started...")
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, os.Kill)
-	listenForShutdown(ch, *cmd)
-	
+	death := DEATH.NewDeath(SYS.SIGINT, SYS.SIGTERM)
+	death.WaitForDeathWithFunc(func() {
+		cmd.Process.Kill()
+		log.Println("container runtime closed...")
+		os.Remove(sock)
+		os.Exit(0)
+	})
+
 	log.Println("container runtime shutdown...")
 }

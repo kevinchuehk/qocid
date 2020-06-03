@@ -1,0 +1,4 @@
+github.com/vrecan/death v3.0.1+incompatible h1:hYRRqrdyoUAbymk2KJ8tNHmZFKcVeThRUySCqwC5Itg=
+github.com/vrecan/death v3.0.1+incompatible/go.mod h1:ektTae4lwvcXJ7pytrLb2N0w7mwhzmu+f5vRHYzy33E=
+gopkg.in/vrecan/death.v3 v3.0.1 h1:qMzChssfxEvW9ckxucDyeLdvd/rhy4LBOyzN8oaFdEU=
+gopkg.in/vrecan/death.v3 v3.0.1/go.mod h1:Jy+S9sSCa4cKJF59FMiiDO5/bLCsOtHC8sK3doI1vQM=
